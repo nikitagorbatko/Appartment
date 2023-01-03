@@ -2,6 +2,7 @@ package liliaikha.my.realestate.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "apartment_info", primaryKeys = ["IdPoryadk", "Id"])
 data class ApartmentInfo(
@@ -20,5 +21,18 @@ data class ApartmentInfo(
     @ColumnInfo(name = "PhoneNumber", defaultValue = "NULL") val phoneNumber: Double? = null,
     @ColumnInfo(name = "Price") val price: Int? = null,
     @ColumnInfo(name = "LinkSellerId") val linkSellerId: String,
+)
+
+@Entity(tableName = "dynamic_info")
+data class DynamicInfo(
+    @PrimaryKey
+    @ColumnInfo(name = "Id") val id: Int,
+    @ColumnInfo(name = "Month") val month: String,
+    @ColumnInfo(name = "Year") val year: String,
+    @ColumnInfo(name = "City") val city: String,
+    @ColumnInfo(name = "PrimaryPrice") val primaryPrice: Int,
+    @ColumnInfo(name = "NewBuildingOfferCount", defaultValue = "NULL") val newBuildingOfferCount: Int?,
+    @ColumnInfo(name = "SecondPrice", defaultValue = "NULL") val secondPrice: Int?,
+    @ColumnInfo(name = "SecondOfferCount", defaultValue = "NULL") val secondOfferCount: Int?,
 )
 

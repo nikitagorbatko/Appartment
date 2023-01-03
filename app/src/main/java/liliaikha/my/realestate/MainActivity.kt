@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import liliaikha.my.realestate.databinding.ActivityMainBinding
-import liliaikha.my.realestate.ui.main.SectionsPagerAdapter
+import liliaikha.my.realestate.ui.apartments.SectionsPagerAdapter
 
 class MainActivity : AppCompatActivity() {
 

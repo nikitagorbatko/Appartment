@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import kotlinx.coroutines.CoroutineScope
 
-@Database(version = 1, entities = [ApartmentInfo::class])
+@Database(version = 1, entities = [ApartmentInfo::class, DynamicInfo::class])
 abstract class ApartmentDatabase : RoomDatabase() {
     abstract fun getDao(): ApartmentDao
 

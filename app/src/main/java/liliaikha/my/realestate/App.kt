@@ -1,7 +1,6 @@
 package liliaikha.my.realestate
 
 import android.app.Application
-import androidx.room.Room
 import liliaikha.my.realestate.database.ApartmentDatabase
 
 class App: Application() {
