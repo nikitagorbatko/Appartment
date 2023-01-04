@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import liliaikha.my.realestate.App
 import liliaikha.my.realestate.database.ApartmentInfo
 import liliaikha.my.realestate.databinding.FragmentApartmentsBinding
+import liliaikha.my.realestate.ui.State
 
 /**
  * A placeholder fragment containing a simple view.
@@ -22,7 +23,6 @@ import liliaikha.my.realestate.databinding.FragmentApartmentsBinding
 class ApartmentsFragment(private val application: Application) : Fragment() {
     private var _binding: FragmentApartmentsBinding? = null
     private val binding get() = _binding!!
-    private var list = listOf<ApartmentInfo>()
 
     private val viewModel: ApartmentsFragmentViewModel by viewModels {
         object : ViewModelProvider.Factory {
@@ -43,9 +43,24 @@ class ApartmentsFragment(private val application: Application) : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentApartmentsBinding.inflate(inflater, container, false)
 
+        viewModel.viewModelScope.launch {
+            viewModel.state.collect {
+                with(binding) {
+                    when(it) {
+                        State.PRESENT -> {
+                            recycler.visibility = View.VISIBLE
+                            progressBar.visibility = View.GONE
+                        }
+                        State.DOWNLOADING -> {
+                            recycler.visibility = View.GONE
+                            progressBar.visibility = View.VISIBLE
+                        }
+                    }
+                }
+            }
+        }
 
         viewModel.viewModelScope.launch {
             viewModel.apartments.collect {

@@ -82,10 +82,10 @@ class ChartsFragment(private val application: Application) : Fragment() {
                         secondaryOfferList.add(info.secondOfferCount?.toFloat() ?: 0f)
                     }
                     with(binding) {
-                        primaryChart.firstSetChart(primaryList, "Первичный рынок", cities, years)
-                        newChart.firstSetChart(newList, "Предложения новостроек", cities, years)
-                        secondaryChart.firstSetChart(secondaryList, "Вторичный рынок", cities, years)
-                        secondaryOfferChart.firstSetChart(secondaryOfferList, "Вторичная недвижимость", cities, years)
+                        primaryChart.firstSetChart(it, "Первичный рынок", cities, years, 1)
+                        newChart.firstSetChart(it, "Предложения новостроек", cities, years, 2)
+                        secondaryChart.firstSetChart(it, "Вторичный рынок", cities, years, 3)
+                        secondaryOfferChart.firstSetChart(it, "Вторичная недвижимость", cities, years, 4)
                     }
                 }
             }

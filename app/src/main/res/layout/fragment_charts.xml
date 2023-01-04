@@ -17,25 +17,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <liliaikha.my.realestate.ui.CustomCardChart
                 android:id="@+id/primary_chart"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <liliaikha.my.realestate.ui.CustomCardChart
                 android:id="@+id/new_chart"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <liliaikha.my.realestate.ui.CustomCardChart
                 android:id="@+id/secondary_chart"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <liliaikha.my.realestate.ui.CustomCardChart
                 android:id="@+id/secondary_offer_chart"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp" />
 
         </LinearLayout>
     </ScrollView>
