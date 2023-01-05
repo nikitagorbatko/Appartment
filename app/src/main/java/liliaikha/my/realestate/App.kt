@@ -3,7 +3,7 @@ package liliaikha.my.realestate
 import android.app.Application
 import liliaikha.my.realestate.database.ApartmentDatabase
 
-class App: Application() {
+class App : Application() {
     lateinit var database: ApartmentDatabase
 
     override fun onCreate() {

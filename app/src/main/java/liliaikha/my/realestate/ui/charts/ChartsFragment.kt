@@ -12,15 +12,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import liliaikha.my.realestate.App
-import liliaikha.my.realestate.database.DynamicInfo
 import liliaikha.my.realestate.databinding.FragmentChartsBinding
+
 
 class ChartsFragment(private val application: Application) : Fragment() {
     private var _binding: FragmentChartsBinding? = null
     private val binding get() = _binding!!
-    private var list = listOf<DynamicInfo>()
-//    private var years: List<String> = listOf()
-//    private var cities: List<String> = listOf()
 
     private val viewModel: ChartsFragmentViewModel by viewModels {
         object : ViewModelProvider.Factory {
@@ -41,21 +38,13 @@ class ChartsFragment(private val application: Application) : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentChartsBinding.inflate(inflater, container, false)
-            //binding.newChart.setChart()
 
-//        viewModel.viewModelScope.launch {
-//            viewModel.cities.collect {
-//                cities = it
-//            }
-//        }
-//
-//        viewModel.viewModelScope.launch {
-//            viewModel.years.collect {
-//                years = it.sorted()
-//            }
-//        }
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         viewModel.viewModelScope.launch {
             viewModel.dynamics.collect {
@@ -71,27 +60,39 @@ class ChartsFragment(private val application: Application) : Fragment() {
                     val cities = allCities.distinct()
                     val years = allYears.distinct().sorted()
 
-                    val primaryList = mutableListOf<Float>()
-                    val newList = mutableListOf<Float>()
-                    val secondaryList = mutableListOf<Float>()
-                    val secondaryOfferList = mutableListOf<Float>()
-                    it.forEach { info ->
-                        primaryList.add(info.primaryPrice.toFloat())
-                        newList.add(info.newBuildingOfferCount?.toFloat() ?: 0f)
-                        secondaryList.add(info.secondPrice?.toFloat() ?: 0f)
-                        secondaryOfferList.add(info.secondOfferCount?.toFloat() ?: 0f)
-                    }
                     with(binding) {
-                        primaryChart.firstSetChart(it, "Первичный рынок", cities, years, 1)
-                        newChart.firstSetChart(it, "Предложения новостроек", cities, years, 2)
-                        secondaryChart.firstSetChart(it, "Вторичный рынок", cities, years, 3)
-                        secondaryOfferChart.firstSetChart(it, "Вторичная недвижимость", cities, years, 4)
+                        primaryChart.firstSetChart(
+                            it,
+                            "Первичный рынок",
+                            cities,
+                            years,
+                            1
+                        )
+                        newChart.firstSetChart(
+                            it,
+                            "Предложения новостроек",
+                            cities,
+                            years,
+                            2
+                        )
+                        secondaryChart.firstSetChart(
+                            it,
+                            "Вторичный рынок",
+                            cities,
+                            years,
+                            3
+                        )
+                        secondaryOfferChart.firstSetChart(
+                            it,
+                            "Вторичная недвижимость",
+                            cities,
+                            years,
+                            4
+                        )
                     }
                 }
             }
         }
-
-        return binding.root
     }
 
     companion object {

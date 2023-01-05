@@ -1,5 +1,15 @@
 <resources>
-    <string name="app_name">Real Estate</string>
-    <string name="tab_text_1">Apartments</string>
-    <string name="tab_text_2">Charts</string>
+    <string name="app_name">Недвижимость</string>
+    <string name="tab_text_1">Квартиры</string>
+    <string name="tab_text_2">Графики</string>
+    <string name="rooms_amount_text">Количество комнат</string>
+    <string name="filter_text">Фильтр</string>
+    <string name="area_text">Площадь</string>
+    <string name="cost_text">Цена</string>
+    <string name="minimal_price">Минимальная цена</string>
+    <string name="max_price">Максимальная цена</string>
+    <string name="search_text">Искать</string>
+    <string name="price_text">Стоимость</string>
+    <string name="city_text">Город</string>
+    <string name="no_result_text">Таких вариантов нет...</string>
 </resources>

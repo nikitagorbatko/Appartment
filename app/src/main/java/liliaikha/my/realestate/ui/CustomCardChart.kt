@@ -2,6 +2,7 @@ package liliaikha.my.realestate.ui
 
 import android.R
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -21,16 +22,16 @@ import liliaikha.my.realestate.databinding.CustomCardChartBinding
 
 class CustomCardChart
 @JvmOverloads constructor(
-    context: Context,
+    private val localContext: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int = 0
-) : CardView(context, attrs, defStyleAttr) {
-    private val binding = CustomCardChartBinding.inflate(LayoutInflater.from(context))
+) : CardView(localContext, attrs, defStyleAttr) {
+    private val binding = CustomCardChartBinding.inflate(LayoutInflater.from(localContext))
     private var selectedCity: String = ""
     private var selectedYear: String = ""
     private lateinit var linedataset: LineDataSet
 
-        init {
+    init {
         addView(binding.root)
     }
 
@@ -39,14 +40,14 @@ class CustomCardChart
         title: String,
         cities: List<String>,
         years: List<String>,
-        type: Int
+        type: Int,
     ) {
         binding.textViewChartName.text = title
 
-        val citiesAdapter = ArrayAdapter<Any?>(context, R.layout.simple_spinner_item, cities)
+        val citiesAdapter = ArrayAdapter<Any?>(localContext, R.layout.simple_spinner_item, cities)
         citiesAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
 
-        val yearsAdapter = ArrayAdapter<Any?>(context, R.layout.simple_spinner_item, years)
+        val yearsAdapter = ArrayAdapter<Any?>(localContext, R.layout.simple_spinner_item, years)
         yearsAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
 
         binding.spinnerCity.adapter = citiesAdapter
@@ -78,7 +79,12 @@ class CustomCardChart
         setChartSet(resultFloats)
     }
 
-    private fun prepareFloatList(list: List<DynamicInfo>, type: Int, selectedCity: String, selectedYear: String): MutableList<Float> {
+    private fun prepareFloatList(
+        list: List<DynamicInfo>,
+        type: Int,
+        selectedCity: String,
+        selectedYear: String
+    ): MutableList<Float> {
         var resultList = list.filter {
             it.year == selectedYear
         }
@@ -133,11 +139,10 @@ class CustomCardChart
 
         linedataset = LineDataSet(linevalues, "Цена")
         linedataset.color = resources.getColor(R.color.holo_blue_bright)
-
         linedataset.circleRadius = 4f
         linedataset.setDrawFilled(true)
         linedataset.valueTextSize = 12F
-        linedataset.fillColor = resources.getColor(R.color.holo_green_dark)
+        linedataset.fillColor = Color.rgb(71, 124, 109)
         linedataset.mode = LineDataSet.Mode.CUBIC_BEZIER
 
         val xAxis: XAxis = binding.chart.xAxis
@@ -150,9 +155,7 @@ class CustomCardChart
         xAxis.position = XAxis.XAxisPosition.BOTTOM
 
         binding.chart.xAxis.valueFormatter = IndexAxisValueFormatter(xAxisValues)
-
-        val data = LineData(linedataset)
-        binding.chart.data = data
+        binding.chart.data = LineData(linedataset)
         binding.chart.setBackgroundColor(resources.getColor(R.color.white))
         binding.chart.setScaleEnabled(false)
         binding.chart.animateXY(2000, 2000, Easing.EaseInCubic)

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="rooms_values">
+        <item>1.0</item>
+        <item>6.0</item>
+    </array>
+
+    <array name="area_values">
+        <item>1.0</item>
+        <item>950.0</item>
+    </array>
+</resources>

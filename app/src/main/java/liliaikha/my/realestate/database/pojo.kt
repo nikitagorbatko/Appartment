@@ -31,7 +31,10 @@ data class DynamicInfo(
     @ColumnInfo(name = "Year") val year: String,
     @ColumnInfo(name = "City") val city: String,
     @ColumnInfo(name = "PrimaryPrice") val primaryPrice: Int,
-    @ColumnInfo(name = "NewBuildingOfferCount", defaultValue = "NULL") val newBuildingOfferCount: Int?,
+    @ColumnInfo(
+        name = "NewBuildingOfferCount",
+        defaultValue = "NULL"
+    ) val newBuildingOfferCount: Int?,
     @ColumnInfo(name = "SecondPrice", defaultValue = "NULL") val secondPrice: Int?,
     @ColumnInfo(name = "SecondOfferCount", defaultValue = "NULL") val secondOfferCount: Int?,
 )
