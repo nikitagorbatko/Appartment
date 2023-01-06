@@ -19,7 +19,7 @@
 
             <TextView
                 android:id="@+id/title"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="7"
                 android:gravity="start"
@@ -29,14 +29,15 @@
                 android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title" />
 
             <ImageView
-                android:id="@+id/imageView"
+                android:id="@+id/filterImageView"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:layout_marginEnd="16dp"
-                android:layout_weight="1"
+                android:layout_weight="1.5"
+                android:scaleType="centerInside"
                 android:visibility="gone"
                 app:srcCompat="@drawable/ic_filter" />
+
         </LinearLayout>
 
         <com.google.android.material.tabs.TabLayout

@@ -21,10 +21,8 @@ private val TAB_TITLES = arrayOf(
  * one of the sections/tabs/pages.
  */
 class SectionsPagerAdapter(
-    private val mainActivity: MainActivity,
     private val application: Application,
     private val context: Context,
-    private val view: ImageView,
     fm: FragmentManager
 ) :
     FragmentPagerAdapter(fm) {
@@ -34,7 +32,7 @@ class SectionsPagerAdapter(
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
         return if (position == 0) {
-            ApartmentsFragment.newInstance(position + 1, application, mainActivity)
+            ApartmentsFragment.newInstance(position + 1, application)
         } else {
             ChartsFragment.newInstance(position + 1, application)
         }

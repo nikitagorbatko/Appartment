@@ -30,12 +30,11 @@ import liliaikha.my.realestate.ui.State
  * A placeholder fragment containing a simple view.
  */
 class ApartmentsFragment(
-    private val application: Application,
-    private val mainActivity: MainActivity
+    private val application: Application
 ) : Fragment() {
     private var _binding: FragmentApartmentsBinding? = null
     private val binding get() = _binding!!
-    private var apartments = mutableListOf<String>()
+    private var cities = listOf<String>()
 
     private val viewModel: ApartmentsFragmentViewModel by viewModels {
         object : ViewModelProvider.Factory {
@@ -46,12 +45,6 @@ class ApartmentsFragment(
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        //viewModel.setIndex(arguments?.getInt(ARG_SECTION_NUMBER) ?: 1)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -60,7 +53,6 @@ class ApartmentsFragment(
 
         return binding.root
     }
-
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -79,20 +71,23 @@ class ApartmentsFragment(
                         State.PRESENT -> {
                             recycler.visibility = View.VISIBLE
                             progressBar.visibility = View.GONE
-                            mainActivity.binding.imageView.visibility = View.VISIBLE
+                            (requireActivity() as MainActivity).binding.filterImageView.visibility =
+                                View.VISIBLE
                             textError.visibility = View.GONE
                         }
                         State.DOWNLOADING -> {
                             recycler.visibility = View.GONE
                             progressBar.visibility = View.VISIBLE
-                            mainActivity.binding.imageView.visibility = View.GONE
+                            (requireActivity() as MainActivity).binding.filterImageView.visibility =
+                                View.GONE
                             textError.visibility = View.GONE
                         }
                         State.EMPTY -> {
                             recycler.visibility = View.GONE
                             progressBar.visibility = View.GONE
                             textError.visibility = View.VISIBLE
-                            mainActivity.binding.imageView.visibility = View.VISIBLE
+                            (requireActivity() as MainActivity).binding.filterImageView.visibility =
+                                View.VISIBLE
                         }
                     }
                 }
@@ -103,38 +98,45 @@ class ApartmentsFragment(
     private fun observeChannel() {
         viewModel.viewModelScope.launch {
             viewModel.channel.collect {
-                it.forEach { localApartment ->
-                    localApartment.city?.let { apartment -> apartments.add(apartment) }
-                }
                 val adapter = RecyclerViewAdapter(it)
                 binding.recycler.adapter = adapter
                 binding.recycler.layoutManager = LinearLayoutManager(context)
-
+            }
+        }
+        viewModel.viewModelScope.launch {
+            viewModel.citiesChanel.collect {
+                if (it.isNotEmpty()) {
+                    cities = it
+                }
             }
         }
     }
 
     private fun onFilterClick() {
         //TODO Костыльно
-        mainActivity.binding.imageView.setOnClickListener {
+        (requireActivity() as MainActivity).binding.filterImageView.setOnClickListener {
             var roomSliderFirst = 0.0f
             var roomSliderSecond = 0.0f
             var areaSliderFirst = 0.0f
             var areaSliderSecond = 0.0f
 
-            val dialog = Dialog(mainActivity)
+            val dialog = Dialog((requireActivity() as MainActivity))
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
             dialog.setCancelable(true)
             dialog.setContentView(R.layout.dialog)
+
+            //spinner
             val spinner = dialog.findViewById<Spinner>(R.id.spinner)
             spinner.isEnabled = false
             val citiesAdapter =
                 ArrayAdapter<Any?>(
-                    mainActivity, android.R.layout.simple_spinner_item,
-                    apartments as List<String>
+                    (requireActivity() as MainActivity),
+                    android.R.layout.simple_spinner_item,
+                    cities
                 )
             citiesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinner.adapter = citiesAdapter
+
             dialog.findViewById<RangeSlider>(R.id.rooms_range_slider)
                 .addOnChangeListener { slider, value, fromUser ->
                     val vals = slider.values
@@ -159,7 +161,7 @@ class ApartmentsFragment(
                 val maxPrice =
                     dialog.findViewById<TextInputEditText>(R.id.max_cost_edit_text).text?.toString()
 
-                val city = apartments[spinner.selectedItemPosition]
+                val city = cities[spinner.selectedItemPosition]
                 viewModel.getFilteredApartments(
                     roomSliderFirst.toInt(),
                     roomSliderSecond.toInt(),
@@ -183,9 +185,8 @@ class ApartmentsFragment(
         fun newInstance(
             sectionNumber: Int,
             application: Application,
-            mainActivity: MainActivity
         ): Fragment {
-            return ApartmentsFragment(application, mainActivity).apply {
+            return ApartmentsFragment(application).apply {
                 arguments = Bundle().apply {
                     putInt(ARG_SECTION_NUMBER, sectionNumber)
                 }

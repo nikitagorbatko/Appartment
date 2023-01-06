@@ -18,12 +18,17 @@ class ApartmentsFragmentViewModel(private val dao: ApartmentDao) : ViewModel() {
     private val _channel = Channel<List<ApartmentInfo>>()
     val channel = _channel.receiveAsFlow()
 
+    private val _citiesChanel = Channel<List<String>>()
+    val citiesChanel = _citiesChanel.receiveAsFlow()
+
     init {
         viewModelScope.launch {
             _state.value = State.DOWNLOADING
-            val result = dao.getAllApartments()
+            val apartments = dao.getAllApartments()
+            val cities = dao.getCities()
             _state.value = State.PRESENT
-            _channel.send(result)
+            _channel.send(apartments)
+            _citiesChanel.send(cities)
         }
     }
 

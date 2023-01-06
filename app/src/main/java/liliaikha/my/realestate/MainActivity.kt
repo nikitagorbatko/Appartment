@@ -2,6 +2,7 @@ package liliaikha.my.realestate
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import liliaikha.my.realestate.databinding.ActivityMainBinding
@@ -20,10 +21,8 @@ class MainActivity : AppCompatActivity() {
 
         sectionsPagerAdapter =
             SectionsPagerAdapter(
-                this,
                 application,
                 applicationContext,
-                binding.imageView,
                 supportFragmentManager
             )
         val viewPager: ViewPager = binding.viewPager

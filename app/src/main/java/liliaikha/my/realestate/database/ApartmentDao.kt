@@ -9,6 +9,9 @@ interface ApartmentDao {
     @Query("SELECT * FROM apartment_info")
     suspend fun getAllApartments(): List<ApartmentInfo>
 
+    @Query("SELECT DISTINCT city FROM apartment_info ORDER BY city ASC")
+    suspend fun getCities(): List<String>
+
     @Query(
         "SELECT * FROM apartment_info WHERE RoomCount BETWEEN :minRooms AND :maxRooms" +
                 " AND TotalArea BETWEEN :minArea AND :maxArea" +
@@ -31,9 +34,4 @@ interface ApartmentDao {
     @Query("SELECT * FROM dynamic_info WHERE City = :city AND Year = :year")
     fun getDynamicInfo(city: String, year: String): Flow<List<DynamicInfo>>
 
-    @Query("SELECT DISTINCT City FROM dynamic_info")
-    fun getCities(): Flow<List<String>>
-
-    @Query("SELECT DISTINCT Year FROM dynamic_info")
-    fun getYears(): Flow<List<String>>
 }
