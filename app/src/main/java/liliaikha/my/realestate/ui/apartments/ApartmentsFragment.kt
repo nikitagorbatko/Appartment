@@ -34,7 +34,7 @@ class ApartmentsFragment(
 ) : Fragment() {
     private var _binding: FragmentApartmentsBinding? = null
     private val binding get() = _binding!!
-    private var cities = listOf<String>()
+    private var regions = listOf<String>()
 
     private val viewModel: ApartmentsFragmentViewModel by viewModels {
         object : ViewModelProvider.Factory {
@@ -104,9 +104,9 @@ class ApartmentsFragment(
             }
         }
         viewModel.viewModelScope.launch {
-            viewModel.citiesChanel.collect {
+            viewModel.regionsChannel.collect {
                 if (it.isNotEmpty()) {
-                    cities = it
+                    regions = it
                 }
             }
         }
@@ -132,7 +132,7 @@ class ApartmentsFragment(
                 ArrayAdapter<Any?>(
                     (requireActivity() as MainActivity),
                     android.R.layout.simple_spinner_item,
-                    cities
+                    regions
                 )
             citiesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinner.adapter = citiesAdapter
@@ -161,13 +161,13 @@ class ApartmentsFragment(
                 val maxPrice =
                     dialog.findViewById<TextInputEditText>(R.id.max_cost_edit_text).text?.toString()
 
-                val city = cities[spinner.selectedItemPosition]
+                val region = regions[spinner.selectedItemPosition]
                 viewModel.getFilteredApartments(
                     roomSliderFirst.toInt(),
                     roomSliderSecond.toInt(),
                     areaSliderFirst.toInt(),
                     areaSliderSecond.toInt(),
-                    city,
+                    region,
                     minPrice?.toIntOrNull(),
                     maxPrice?.toIntOrNull(),
                     switch.isChecked

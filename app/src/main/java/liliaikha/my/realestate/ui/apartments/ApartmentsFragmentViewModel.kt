@@ -18,17 +18,17 @@ class ApartmentsFragmentViewModel(private val dao: ApartmentDao) : ViewModel() {
     private val _channel = Channel<List<ApartmentInfo>>()
     val channel = _channel.receiveAsFlow()
 
-    private val _citiesChanel = Channel<List<String>>()
-    val citiesChanel = _citiesChanel.receiveAsFlow()
+    private val _regionsChannel = Channel<List<String>>()
+    val regionsChannel = _regionsChannel.receiveAsFlow()
 
     init {
         viewModelScope.launch {
             _state.value = State.DOWNLOADING
             val apartments = dao.getAllApartments()
-            val cities = dao.getCities()
+            val regions = dao.getRegions()
             _state.value = State.PRESENT
             _channel.send(apartments)
-            _citiesChanel.send(cities)
+            _regionsChannel.send(regions)
         }
     }
 
@@ -37,7 +37,7 @@ class ApartmentsFragmentViewModel(private val dao: ApartmentDao) : ViewModel() {
         maxRoomsParameter: Int,
         minAreaParameter: Int,
         maxAreaParameter: Int,
-        cityParameter: String?,
+        regionParameter: String?,
         minPriceParameter: Int?,
         maxPriceParameter: Int?,
         withCity: Boolean
@@ -49,8 +49,8 @@ class ApartmentsFragmentViewModel(private val dao: ApartmentDao) : ViewModel() {
         val maxRooms = if (maxRoomsParameter == 0) 6 else maxRoomsParameter
         val maxArea = if (maxAreaParameter == 0) 950 else maxAreaParameter
 
-        val city = if (withCity) {
-            cityParameter!!
+        val region = if (withCity) {
+            regionParameter!!
         } else {
             "%"
         }
@@ -61,7 +61,7 @@ class ApartmentsFragmentViewModel(private val dao: ApartmentDao) : ViewModel() {
                 maxRooms,
                 minAreaParameter,
                 maxArea,
-                city,
+                region,
                 minPrice,
                 maxPrice
             )

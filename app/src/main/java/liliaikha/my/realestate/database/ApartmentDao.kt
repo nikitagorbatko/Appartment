@@ -9,13 +9,13 @@ interface ApartmentDao {
     @Query("SELECT * FROM apartment_info")
     suspend fun getAllApartments(): List<ApartmentInfo>
 
-    @Query("SELECT DISTINCT city FROM apartment_info ORDER BY city ASC")
-    suspend fun getCities(): List<String>
+    @Query("SELECT DISTINCT region FROM apartment_info ORDER BY region ASC")
+    suspend fun getRegions(): List<String>
 
     @Query(
         "SELECT * FROM apartment_info WHERE RoomCount BETWEEN :minRooms AND :maxRooms" +
                 " AND TotalArea BETWEEN :minArea AND :maxArea" +
-                " AND City LIKE :city" +
+                " AND Region LIKE :region" +
                 " AND Price BETWEEN :minPrice AND :maxPrice"
     )
     suspend fun getFilteredApartments(
@@ -23,7 +23,7 @@ interface ApartmentDao {
         maxRooms: Int,
         minArea: Int,
         maxArea: Int,
-        city: String,
+        region: String,
         minPrice: Int,
         maxPrice: Int
     ): List<ApartmentInfo>
