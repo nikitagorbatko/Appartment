@@ -2,13 +2,19 @@ package liliaikha.my.realestate.ui.apartments
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
+import liliaikha.my.realestate.R
 import liliaikha.my.realestate.database.ApartmentInfo
 import liliaikha.my.realestate.databinding.ItemBinding
+import liliaikha.my.realestate.ui.item.ItemFragment
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
-class RecyclerViewAdapter(private val list: List<ApartmentInfo>) :
+class RecyclerViewAdapter(
+    private val list: List<ApartmentInfo>,
+    private val fragmentManager: FragmentManager
+) :
     RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
     private val formatter = DecimalFormat("#,###")
 
@@ -25,15 +31,21 @@ class RecyclerViewAdapter(private val list: List<ApartmentInfo>) :
         with(viewHolder) {
             val price = formatter.format(item.price)
             val main =
-                "Количество комнат-${item.roomCount?.roundToInt()}\nОбщая площадь-${item.totalArea}м2\nКухонная площадь-${item.kitchenArea}\nЭтаж-${item.floor?.roundToInt()}"
+                "Количество комнат-${item.roomCount?.roundToInt()}\n" +
+                        "Общая площадь-${item.totalArea}м2\nКухонная площадь" +
+                        if (item.kitchenArea?.equals(0.0f) == true) " не указана" else "-${item.kitchenArea}м2"
+            "\nЭтаж-${item.floor?.roundToInt()}"
             binding.textViewCity.text = item.city
             binding.textViewAddress.text = item.adress
             binding.textViewMain.text = main
             binding.textViewPrice.text = "$price руб"
-//            Glide.with(binding.root)
-//                .load(item.image)
-//                .override(600, 300)
-//                .into(binding.imageView)
+            binding.root.setOnClickListener {
+                fragmentManager
+                    .beginTransaction()
+                    .replace(R.id.container, ItemFragment.getInstance(item))
+                    .addToBackStack(ItemFragment.toString())
+                    .commit()
+            }
         }
     }
 

@@ -2,32 +2,24 @@ package liliaikha.my.realestate
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.viewpager.widget.ViewPager
-import com.google.android.material.tabs.TabLayout
 import liliaikha.my.realestate.databinding.ActivityMainBinding
+import liliaikha.my.realestate.ui.MainFragment
 import liliaikha.my.realestate.ui.apartments.SectionsPagerAdapter
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
         private set
-    private lateinit var sectionsPagerAdapter: SectionsPagerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        val mainFragment = MainFragment.getInstance(binding, application)
 
-        sectionsPagerAdapter =
-            SectionsPagerAdapter(
-                application,
-                applicationContext,
-                supportFragmentManager
-            )
-        val viewPager: ViewPager = binding.viewPager
-        viewPager.adapter = sectionsPagerAdapter
-        val tabs: TabLayout = binding.tabs
-        tabs.setupWithViewPager(viewPager)
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.container, mainFragment)
+            .commit()
     }
 }

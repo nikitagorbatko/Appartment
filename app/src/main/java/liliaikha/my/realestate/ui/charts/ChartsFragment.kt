@@ -28,24 +28,16 @@ class ChartsFragment(private val application: Application) : Fragment() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        //viewModel.setIndex(arguments?.getInt(ARG_SECTION_NUMBER) ?: 1)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentChartsBinding.inflate(inflater, container, false)
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         viewModel.viewModelScope.launch {
             viewModel.dynamics.collect {
                 if (it.isNotEmpty()) {

@@ -3,11 +3,11 @@ package liliaikha.my.realestate.ui.apartments
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import android.widget.ImageView
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import liliaikha.my.realestate.MainActivity
 import liliaikha.my.realestate.R
 import liliaikha.my.realestate.ui.charts.ChartsFragment
 
@@ -24,8 +24,8 @@ class SectionsPagerAdapter(
     private val application: Application,
     private val context: Context,
     fm: FragmentManager
-) :
-    FragmentPagerAdapter(fm) {
+) : FragmentPagerAdapter(fm) {
+    val fragments = mutableListOf<Fragment>()
 
     override fun getItem(position: Int): Fragment {
         Log.d("TAG", "${position + 1}")
@@ -38,12 +38,15 @@ class SectionsPagerAdapter(
         }
     }
 
+    override fun instantiateItem(container: ViewGroup, position: Int): Any {
+        val createdFragment = super.instantiateItem(container, position) as Fragment
+        fragments.add(createdFragment)
+        return createdFragment
+    }
+
     override fun getPageTitle(position: Int): CharSequence? {
         return context.resources.getString(TAB_TITLES[position])
     }
 
-    override fun getCount(): Int {
-        // Show 2 total pages.
-        return 2
-    }
+    override fun getCount() = 2
 }

@@ -98,9 +98,11 @@ class ApartmentsFragment(
     private fun observeChannel() {
         viewModel.viewModelScope.launch {
             viewModel.channel.collect {
-                val adapter = RecyclerViewAdapter(it)
-                binding.recycler.adapter = adapter
-                binding.recycler.layoutManager = LinearLayoutManager(context)
+                if (it.isNotEmpty()) {
+                    val adapter = RecyclerViewAdapter(it, parentFragmentManager)
+                    binding.recycler.adapter = adapter
+                    binding.recycler.layoutManager = LinearLayoutManager(context)
+                }
             }
         }
         viewModel.viewModelScope.launch {
