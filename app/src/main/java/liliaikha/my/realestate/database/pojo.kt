@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 data class ApartmentInfo(
     @ColumnInfo(name = "IdPoryadk") val idPoryadk: Int,
     @ColumnInfo(name = "Id") val id: Int,
+    @ColumnInfo(name = "Object") val obj: String?,
     @ColumnInfo(name = "Image") val image: String?,
     @ColumnInfo(name = "Region") val region: String?,
     @ColumnInfo(name = "City") val city: String?,
@@ -20,7 +21,13 @@ data class ApartmentInfo(
     @ColumnInfo(name = "CeilingHeight", defaultValue = "NULL") val ceilingHeight: Double? = null,
     @ColumnInfo(name = "PhoneNumber", defaultValue = "NULL") val phoneNumber: Double? = null,
     @ColumnInfo(name = "Price") val price: Int? = null,
+    @ColumnInfo(name = "Bathroom") val bathroom: String? = null,
+    @ColumnInfo(name = "BalconyType") val balconyType: String? = null,
+    @ColumnInfo(name = "Repair") val repair: String? = null,
+    @ColumnInfo(name = "WindowView") val windowView: String? = null,
+    @ColumnInfo(name = "Layout") val layout: String? = null,
     @ColumnInfo(name = "LinkSellerId") val linkSellerId: String,
+    //Description field was removed from database file due to the big size of it.
 )
 
 @Entity(tableName = "dynamic_info")

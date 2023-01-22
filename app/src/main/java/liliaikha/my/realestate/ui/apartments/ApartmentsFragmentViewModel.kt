@@ -2,33 +2,49 @@ package liliaikha.my.realestate.ui.apartments
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import liliaikha.my.realestate.database.ApartmentDao
 import liliaikha.my.realestate.database.ApartmentInfo
-import liliaikha.my.realestate.ui.State
 
 class ApartmentsFragmentViewModel(private val dao: ApartmentDao) : ViewModel() {
-    private val _state = MutableStateFlow(State.DOWNLOADING)
+    var roomSliderValueFrom = 1.0f
+    var roomSliderValueTo = 6.0f
+    var areaSliderValueFrom = 1.0f
+    var areaSliderValueTo = 950.0f
+    var switchCitiesChecked = false
+    var switchSortChecked = false
+    var minPrice = ""
+    var maxPrice = ""
+    var selectedCitySpinnerPosition = 0
+    var selectedSortSpinnerPosition = 0
+
+    private val _maxRooms = MutableStateFlow(1.0f)
+    val maxRooms = _maxRooms.asStateFlow()
+
+    private val _maxArea = MutableStateFlow(950.0f)
+    val maxArea = _maxArea.asStateFlow()
+
+    private val _state = MutableStateFlow(ApartmentsFragmentState.DOWNLOADING)
     val state = _state.asStateFlow()
 
-    private val _channel = Channel<List<ApartmentInfo>>()
-    val channel = _channel.receiveAsFlow()
+    private val _apartmentsState = MutableStateFlow<ArrayList<ApartmentInfo>>(arrayListOf())
+    val apartmentsState = _apartmentsState.asStateFlow()
 
-    private val _regionsChannel = Channel<List<String>>()
-    val regionsChannel = _regionsChannel.receiveAsFlow()
+    private val _regionsState = MutableStateFlow<List<String>>(listOf())
+    val regionsState = _regionsState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            _state.value = State.DOWNLOADING
+            _state.value = ApartmentsFragmentState.DOWNLOADING
             val apartments = dao.getAllApartments()
             val regions = dao.getRegions()
-            _state.value = State.PRESENT
-            _channel.send(apartments)
-            _regionsChannel.send(regions)
+            _maxArea.value = dao.getMaxRooms().toFloat()
+            _maxRooms.value =  dao.getMaxArea().toFloat()
+            _state.value = ApartmentsFragmentState.PRESENT
+            _apartmentsState.value = ArrayList(apartments)
+            _regionsState.value = regions
         }
     }
 
@@ -38,6 +54,7 @@ class ApartmentsFragmentViewModel(private val dao: ApartmentDao) : ViewModel() {
         minAreaParameter: Int,
         maxAreaParameter: Int,
         regionParameter: String?,
+        sortParameter: Int?,
         minPriceParameter: Int?,
         maxPriceParameter: Int?,
         withCity: Boolean
@@ -54,22 +71,47 @@ class ApartmentsFragmentViewModel(private val dao: ApartmentDao) : ViewModel() {
         } else {
             "%"
         }
+        val byAsc = sortParameter!! % 2 == 0
+        val sortField = when(sortParameter!!) {
+                0 -> "RoomCount"
+                1 -> "RoomCount"
+                2 -> "TotalArea"
+                3 -> "TotalArea"
+                4 -> "Price"
+                5 -> "Price"
+                else -> "Id"
+        }
         viewModelScope.launch {
-            _state.value = State.DOWNLOADING
-            val result = dao.getFilteredApartments(
-                minRooms,
-                maxRooms,
-                minAreaParameter,
-                maxArea,
-                region,
-                minPrice,
-                maxPrice
-            )
-            if (result.isEmpty()) {
-                _state.value = State.EMPTY
+            _state.value = ApartmentsFragmentState.DOWNLOADING
+            val result = if (byAsc) {
+                dao.getFilteredApartmentsAsc(
+                    minRooms,
+                    maxRooms,
+                    minAreaParameter,
+                    maxArea,
+                    region,
+                    minPrice,
+                    maxPrice,
+                    sortField,
+                )
             } else {
-                _state.value = State.PRESENT
-                _channel.send(result)
+                dao.getFilteredApartmentsDesc(
+                    minRooms,
+                    maxRooms,
+                    minAreaParameter,
+                    maxArea,
+                    region,
+                    minPrice,
+                    maxPrice,
+                    sortField,
+                )
+            }
+
+            if (result.isEmpty()) {
+                _state.value = ApartmentsFragmentState.EMPTY
+            } else {
+                _state.value = ApartmentsFragmentState.PRESENT
+                _apartmentsState.value = ArrayList(result)
             }
         }
     }

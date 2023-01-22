@@ -3,15 +3,20 @@ package liliaikha.my.realestate.ui.apartments
 import android.app.Application
 import android.app.Dialog
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -23,18 +28,30 @@ import kotlinx.coroutines.launch
 import liliaikha.my.realestate.App
 import liliaikha.my.realestate.MainActivity
 import liliaikha.my.realestate.R
+import liliaikha.my.realestate.database.ApartmentInfo
 import liliaikha.my.realestate.databinding.FragmentApartmentsBinding
-import liliaikha.my.realestate.ui.State
+import liliaikha.my.realestate.ui.main.MainFragmentViewModel
 
-/**
- * A placeholder fragment containing a simple view.
- */
 class ApartmentsFragment(
-    private val application: Application
+    private val application: Application,
+    private val localFragmentManager: FragmentManager,
+    private val mainFragmentViewModel: MainFragmentViewModel
 ) : Fragment() {
+    private lateinit var apartments: ArrayList<ApartmentInfo>
+    private lateinit var adapter: RecyclerViewAdapter
     private var _binding: FragmentApartmentsBinding? = null
     private val binding get() = _binding!!
     private var regions = listOf<String>()
+    private val sorts = listOf(
+        "Количество комнат ↑",
+        "Количество комнат ↓",
+        "Площадь ↑",
+        "Площадь ↓",
+        "Стоимость ↑",
+        "Стоимость ↓"
+    )
+    private var maxArea = 0.0f
+    private var maxRooms = 1.0f
 
     private val viewModel: ApartmentsFragmentViewModel by viewModels {
         object : ViewModelProvider.Factory {
@@ -50,7 +67,8 @@ class ApartmentsFragment(
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentApartmentsBinding.inflate(inflater, container, false)
-
+        apartments = arrayListOf()
+        adapter = RecyclerViewAdapter(apartments, localFragmentManager, mainFragmentViewModel)
         return binding.root
     }
 
@@ -58,9 +76,12 @@ class ApartmentsFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.recycler.adapter = adapter
+        binding.recycler.layoutManager = LinearLayoutManager(context)
+
         observeState()
         observeChannel()
-        onFilterClick()
+        filterBinding()
     }
 
     private fun observeState() {
@@ -68,21 +89,21 @@ class ApartmentsFragment(
             viewModel.state.collect {
                 with(binding) {
                     when (it) {
-                        State.PRESENT -> {
+                        ApartmentsFragmentState.PRESENT -> {
                             recycler.visibility = View.VISIBLE
                             progressBar.visibility = View.GONE
                             (requireActivity() as MainActivity).binding.filterImageView.visibility =
                                 View.VISIBLE
                             textError.visibility = View.GONE
                         }
-                        State.DOWNLOADING -> {
+                        ApartmentsFragmentState.DOWNLOADING -> {
                             recycler.visibility = View.GONE
                             progressBar.visibility = View.VISIBLE
                             (requireActivity() as MainActivity).binding.filterImageView.visibility =
                                 View.GONE
                             textError.visibility = View.GONE
                         }
-                        State.EMPTY -> {
+                        ApartmentsFragmentState.EMPTY -> {
                             recycler.visibility = View.GONE
                             progressBar.visibility = View.GONE
                             textError.visibility = View.VISIBLE
@@ -97,16 +118,27 @@ class ApartmentsFragment(
 
     private fun observeChannel() {
         viewModel.viewModelScope.launch {
-            viewModel.channel.collect {
+            viewModel.maxArea.collect {
+                maxArea = it
+            }
+        }
+        viewModel.viewModelScope.launch {
+            viewModel.maxRooms.collect {
+                maxRooms = it
+            }
+        }
+        viewModel.viewModelScope.launch {
+            viewModel.apartmentsState.collect {
                 if (it.isNotEmpty()) {
-                    val adapter = RecyclerViewAdapter(it, parentFragmentManager)
-                    binding.recycler.adapter = adapter
-                    binding.recycler.layoutManager = LinearLayoutManager(context)
+                    apartments.clear()
+                    apartments.addAll(it)
+                    binding.recycler.scrollToPosition(0)
+                    adapter.notifyDataSetChanged()
                 }
             }
         }
         viewModel.viewModelScope.launch {
-            viewModel.regionsChannel.collect {
+            viewModel.regionsState.collect {
                 if (it.isNotEmpty()) {
                     regions = it
                 }
@@ -114,22 +146,36 @@ class ApartmentsFragment(
         }
     }
 
-    private fun onFilterClick() {
-        //TODO Костыльно
+    private fun filterBinding() {
         (requireActivity() as MainActivity).binding.filterImageView.setOnClickListener {
-            var roomSliderFirst = 0.0f
-            var roomSliderSecond = 0.0f
-            var areaSliderFirst = 0.0f
-            var areaSliderSecond = 0.0f
-
             val dialog = Dialog((requireActivity() as MainActivity))
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
             dialog.setCancelable(true)
             dialog.setContentView(R.layout.dialog)
 
-            //spinner
-            val spinner = dialog.findViewById<Spinner>(R.id.spinner)
-            spinner.isEnabled = false
+            var roomSliderValueFromLocal = viewModel.roomSliderValueFrom
+            var roomSliderValueToLocal = viewModel.roomSliderValueTo
+            var areaSliderValueFromLocal = viewModel.areaSliderValueFrom
+            var areaSliderValueToLocal = viewModel.areaSliderValueTo
+
+            val switchSort = dialog.findViewById<SwitchCompat>(R.id.switch_sort)
+            val switchCities = dialog.findViewById<SwitchCompat>(R.id.switch_cities)
+            val areaSlider = dialog.findViewById<RangeSlider>(R.id.area_range_slider)
+            val roomsSlider = dialog.findViewById<RangeSlider>(R.id.rooms_range_slider)
+            val spinnerSort = dialog.findViewById<Spinner>(R.id.spinner_sort)
+            val spinnerCities = dialog.findViewById<Spinner>(R.id.spinner_cities)
+            val textMinPrice = dialog.findViewById<TextInputEditText>(R.id.min_cost_edit_text)
+            val textMaxPrice = dialog.findViewById<TextInputEditText>(R.id.max_cost_edit_text)
+
+            textMinPrice.setText(viewModel.minPrice)
+            textMaxPrice.setText(viewModel.maxPrice)
+            roomsSlider.setValues(viewModel.roomSliderValueFrom, viewModel.roomSliderValueTo)
+            areaSlider.setValues(viewModel.areaSliderValueFrom, viewModel.areaSliderValueTo)
+            switchCities.isChecked = viewModel.switchCitiesChecked
+            switchSort.isChecked = viewModel.switchSortChecked
+            spinnerSort.isEnabled = viewModel.switchSortChecked
+            spinnerCities.isEnabled = viewModel.switchCitiesChecked
+
             val citiesAdapter =
                 ArrayAdapter<Any?>(
                     (requireActivity() as MainActivity),
@@ -137,42 +183,68 @@ class ApartmentsFragment(
                     regions
                 )
             citiesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner.adapter = citiesAdapter
+            spinnerCities.adapter = citiesAdapter
+            spinnerCities.setSelection(viewModel.selectedCitySpinnerPosition)
 
-            dialog.findViewById<RangeSlider>(R.id.rooms_range_slider)
-                .addOnChangeListener { slider, value, fromUser ->
-                    val vals = slider.values
-                    roomSliderFirst = vals[0]
-                    roomSliderSecond = vals[1]
-                }
-            dialog.findViewById<RangeSlider>(R.id.area_range_slider)
-                .addOnChangeListener { slider, value, fromUser ->
-                    val vals = slider.values
-                    areaSliderFirst = vals[0]
-                    areaSliderSecond = vals[1]
-                }
+            val sortAdapter =
+                ArrayAdapter<Any?>(
+                    (requireActivity() as MainActivity),
+                    android.R.layout.simple_spinner_item,
+                    sorts
+                )
+            sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerSort.adapter = sortAdapter
+            spinnerSort.setSelection(viewModel.selectedSortSpinnerPosition)
 
-            val switch = dialog.findViewById<SwitchCompat>(R.id.switch1)
-            switch.setOnCheckedChangeListener { compoundButton, b ->
-                spinner.isEnabled = b
+            roomsSlider.addOnChangeListener { slider, _, _ ->
+                with(slider.values) {
+                    roomSliderValueFromLocal = this[0]
+                    roomSliderValueToLocal = this[1]
+                }
+            }
+
+            areaSlider.addOnChangeListener { slider, _, _ ->
+                with(slider.values) {
+                    areaSliderValueFromLocal = this[0]
+                    areaSliderValueToLocal = this[1]
+                }
+            }
+
+            switchCities.setOnCheckedChangeListener { _, b ->
+                spinnerCities.isEnabled = b
+            }
+
+            switchSort.setOnCheckedChangeListener { _, b ->
+                spinnerSort.isEnabled = b
             }
 
             dialog.findViewById<Button>(R.id.button).setOnClickListener {
-                val minPrice =
-                    dialog.findViewById<TextInputEditText>(R.id.min_cost_edit_text).text?.toString()
-                val maxPrice =
-                    dialog.findViewById<TextInputEditText>(R.id.max_cost_edit_text).text?.toString()
+                val minPrice = textMinPrice.text?.toString()
+                val maxPrice = textMaxPrice.text?.toString()
+                val region = regions[spinnerCities.selectedItemPosition]
+                val sort = spinnerSort.selectedItemPosition
 
-                val region = regions[spinner.selectedItemPosition]
+                viewModel.maxPrice = maxPrice ?: viewModel.maxPrice
+                viewModel.minPrice = minPrice ?: viewModel.minPrice
+                viewModel.switchSortChecked = switchSort.isChecked
+                viewModel.switchCitiesChecked = switchCities.isChecked
+                viewModel.roomSliderValueFrom = roomSliderValueFromLocal
+                viewModel.roomSliderValueTo = roomSliderValueToLocal
+                viewModel.areaSliderValueFrom = areaSliderValueFromLocal
+                viewModel.areaSliderValueTo = areaSliderValueToLocal
+                viewModel.selectedSortSpinnerPosition = spinnerSort.selectedItemPosition
+                viewModel.selectedCitySpinnerPosition = spinnerCities.selectedItemPosition
+
                 viewModel.getFilteredApartments(
-                    roomSliderFirst.toInt(),
-                    roomSliderSecond.toInt(),
-                    areaSliderFirst.toInt(),
-                    areaSliderSecond.toInt(),
+                    viewModel.roomSliderValueFrom.toInt(),
+                    viewModel.roomSliderValueTo.toInt(),
+                    viewModel.areaSliderValueFrom.toInt(),
+                    viewModel.areaSliderValueTo.toInt(),
                     region,
+                    sort,
                     minPrice?.toIntOrNull(),
                     maxPrice?.toIntOrNull(),
-                    switch.isChecked
+                    switchCities.isChecked,
                 )
                 dialog.dismiss()
             }
@@ -181,19 +253,12 @@ class ApartmentsFragment(
     }
 
     companion object {
-        private const val ARG_SECTION_NUMBER = "section_number"
-
         @JvmStatic
         fun newInstance(
-            sectionNumber: Int,
             application: Application,
-        ): Fragment {
-            return ApartmentsFragment(application).apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_SECTION_NUMBER, sectionNumber)
-                }
-            }
-        }
+            localFragmentManager: FragmentManager,
+            mainFragmentViewModel: MainFragmentViewModel
+        ) = ApartmentsFragment(application, localFragmentManager, mainFragmentViewModel)
     }
 
     override fun onDestroyView() {

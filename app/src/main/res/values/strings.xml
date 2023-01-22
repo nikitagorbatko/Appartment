@@ -12,4 +12,20 @@
     <string name="price_text">Стоимость</string>
     <string name="city_text">Город</string>
     <string name="no_result_text">Таких вариантов нет…</string>
+    <string name="object_type">Тип объекта:</string>
+    <string name="address">Адрес:</string>
+    <string name="rooms_count">Количество комнат:</string>
+    <string name="floor">Этаж:</string>
+    <string name="living_area">Жилая площадь:</string>
+    <string name="kitchen_area">Площадь кухни:</string>
+    <string name="height">Высота потолков:</string>
+    <string name="bathroom">Санузел:</string>
+    <string name="balcony">Балкон/лоджия:</string>
+    <string name="repair">Ремонт:</string>
+    <string name="window_view">Вид из окон:</string>
+    <string name="phone_number">Номер телефона:</string>
+    <string name="price">Цена:</string>
+    <string name="no_info_string">нет информации.</string>
+    <string name="total_area">Общая площадь:</string>
+    <string name="open_map_button_text">Показать на карте</string>
 </resources>

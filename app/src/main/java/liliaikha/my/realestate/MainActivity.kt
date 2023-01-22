@@ -3,8 +3,8 @@ package liliaikha.my.realestate
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import liliaikha.my.realestate.databinding.ActivityMainBinding
-import liliaikha.my.realestate.ui.MainFragment
-import liliaikha.my.realestate.ui.apartments.SectionsPagerAdapter
+import liliaikha.my.realestate.ui.main.MainFragment
+//import ru.dgis.sdk.DGis
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
@@ -12,14 +12,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+            //val sdkContext = DGis.initialize(applicationContext)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val mainFragment = MainFragment.getInstance(binding, application)
 
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.container, mainFragment)
+            //.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit)
+            .replace(R.id.container, MainFragment.getInstance(binding, application))
             .commit()
     }
 }

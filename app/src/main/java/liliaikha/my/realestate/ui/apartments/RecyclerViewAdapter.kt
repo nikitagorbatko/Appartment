@@ -8,12 +8,14 @@ import liliaikha.my.realestate.R
 import liliaikha.my.realestate.database.ApartmentInfo
 import liliaikha.my.realestate.databinding.ItemBinding
 import liliaikha.my.realestate.ui.item.ItemFragment
+import liliaikha.my.realestate.ui.main.MainFragmentViewModel
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
 class RecyclerViewAdapter(
-    private val list: List<ApartmentInfo>,
-    private val fragmentManager: FragmentManager
+    private var apartmentsList: List<ApartmentInfo>,
+    private val fragmentManager: FragmentManager,
+    private val viewModel: MainFragmentViewModel
 ) :
     RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
     private val formatter = DecimalFormat("#,###")
@@ -27,28 +29,37 @@ class RecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val item = list[position]
+        val item = apartmentsList[position]
         with(viewHolder) {
-            val price = formatter.format(item.price)
-            val main =
-                "Количество комнат-${item.roomCount?.roundToInt()}\n" +
-                        "Общая площадь-${item.totalArea}м2\nКухонная площадь" +
-                        if (item.kitchenArea?.equals(0.0f) == true) " не указана" else "-${item.kitchenArea}м2"
-            "\nЭтаж-${item.floor?.roundToInt()}"
-            binding.textViewCity.text = item.city
-            binding.textViewAddress.text = item.adress
-            binding.textViewMain.text = main
-            binding.textViewPrice.text = "$price руб"
-            binding.root.setOnClickListener {
-                fragmentManager
-                    .beginTransaction()
-                    .replace(R.id.container, ItemFragment.getInstance(item))
-                    .addToBackStack(ItemFragment.toString())
-                    .commit()
+            val price = formatter.format(item.price) + "руб"
+            val infoText = """
+                Количество комнат-${item.roomCount?.roundToInt()}
+                Общая площадь-${item.totalArea}м2
+                Кухонная площадь-${
+                    if (item.kitchenArea != null && item.kitchenArea == 0.0) 
+                        "не указана" 
+                    else 
+                        "${item.kitchenArea}м2"
+                }
+                Этаж-${item.floor?.roundToInt()}
+            """.trimIndent()
+
+            with(binding) {
+                textViewCity.text = item.city
+                textViewAddress.text = item.adress
+                textViewMain.text = infoText
+                textViewPrice.text = price
+                root.setOnClickListener {
+                    fragmentManager
+                        .beginTransaction()
+                        .replace(R.id.container, ItemFragment.getInstance(item))
+                        .addToBackStack(ItemFragment.toString())
+                        .commit()
+                    viewModel.setFlatState()
+                }
             }
         }
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = list.size
+    override fun getItemCount() = apartmentsList.size
 }

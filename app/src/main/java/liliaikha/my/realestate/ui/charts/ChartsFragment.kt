@@ -88,16 +88,9 @@ class ChartsFragment(private val application: Application) : Fragment() {
     }
 
     companion object {
-        private const val ARG_SECTION_NUMBER = "section_number"
 
         @JvmStatic
-        fun newInstance(sectionNumber: Int, application: Application): Fragment {
-            return ChartsFragment(application).apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_SECTION_NUMBER, sectionNumber)
-                }
-            }
-        }
+        fun newInstance(application: Application) = ChartsFragment(application)
     }
 
     override fun onDestroyView() {
